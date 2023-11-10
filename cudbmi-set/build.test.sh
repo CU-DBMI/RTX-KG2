@@ -8,7 +8,7 @@ set -e
 # cd to the home dir for ubuntu user
 cd /home/ubuntu
 
-# insert fixes into line 102 of /home/ubuntu/RTX-KG2/setup-kg2-build.sh 
+# insert fixes into line 102 of /home/ubuntu/RTX-KG2/setup-kg2-build.sh
 # for correcting python build requirements
 sudo sed -i.bak \
     '102r /home/ubuntu/RTX-KG2/cudbmi-set/python-pydantic-core-workarounds.sh' \
