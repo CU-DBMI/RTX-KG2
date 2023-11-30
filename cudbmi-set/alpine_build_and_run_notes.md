@@ -53,27 +53,11 @@ This section describes how to build the image which will be used to create the d
 
 ### Requirements
 
-- __Operating system__:
-  - OS: Ubuntu 18.04 (64-bit x86)
-  - Passwordless `sudo`
-  - ingress TCP packets on port 22 (`ssh`) permitted
-- __Resources__:
-  - 256 GiB of system memory
-  - 1,023 GiB of disk space in the root file system
-- __Data__:
-  - pre-placed in related S3 buckets (referenced by `master-config.shinc` `s3_bucket`, `s3_bucket_public`, and
-    `s3_bucket_versioned`):
-    - full
-      Unified Medical Language System (UMLS) distribution: `umls-2022AA-metathesaurus.zip` ([UMLS website](https://www.nlm.nih.gov/research/umls/))
-    - DrugBank distribution (`drugbank.xml.gz`)
-- __Data transfer__
-  - commented line for:
+The following resources are suggested for building the image (and not creating the dataset).
 
-    ```text
-    `master-config.shinc`), or in the file `finish-snakemake.sh`, you can
-    comment out the line that copies the final gzipped JSON file to the S3
-    bucket
-    ```
+- __Resources__:
+  - 32 GB of system memory
+  - 1 GB of disk space
 
 ### Steps
 
