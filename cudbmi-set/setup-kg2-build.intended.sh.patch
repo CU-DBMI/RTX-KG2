@@ -1,0 +1,31 @@
+--- setup-kg2-build.sh	2023-10-11 16:01:11.000000000 -0600
++++ cudbmi-set/setup-kg2-build.intended.sh	2023-11-30 16:05:56.000000000 -0700
+@@ -100,6 +100,14 @@
+ 
+ # we want python3.7 (also need python3.7-dev or else pip cannot install the python package "mysqlclient")
+ source ${CODE_DIR}/setup-python37-with-pip3-in-ubuntu.shinc
++# workarounds added to setup-kg2-build.sh
++
++# these setuptools requirements appear to be interrelated
++# and cause errors when left as-is with RTX-KG2 builds through setup-kg2-build.sh
++sudo /home/ubuntu/kg2-venv/bin/pip3 uninstall --yes setuptools
++sudo /home/ubuntu/kg2-venv/bin/pip3 install setuptools-rust pip setuptools -U
++
++# continue original script
+ ${VENV_DIR}/bin/pip3 install -r ${CODE_DIR}/requirements-kg2-build.txt
+ 
+ ## install ROBOT (software: ROBOT is an OBO Tool) by downloading the jar file
+@@ -159,11 +167,12 @@
+           -e "set global local_infile=1"
+ 
+     ## setup PostGreSQL
+-    sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
++    sudo sh -c 'echo "deb https://apt-archive.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+     wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+     sudo apt-get update
+     sudo apt-get -y install postgresql
+     
++    sudo service postgresql start
+     # Addresses permission issues
+     # https://stackoverflow.com/questions/38470952/postgres-can-not-change-directory-in-ubuntu-14-04
+     cd ~postgres/
