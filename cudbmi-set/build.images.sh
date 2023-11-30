@@ -23,56 +23,20 @@ mkdir -p ./image
 # clear images
 rm -f ./image/*
 
-# create a buildx builder
-# Check if the builder with the specified name already exists
-if ! docker buildx inspect mybuilder >/dev/null 2>&1; then
-    # Builder does not exist, create it
-    # note: requires additional driver-opt and buildkitd-flags to avoid
-    # local network issues "ERROR: failed to solve: granting entitlement network.host..."
-    # referenced: https://github.com/docker/buildx/issues/835#issuecomment-966496802
-    docker buildx create \
-    --use \
-    --name mybuilder \
-    --driver-opt network=host \
-    --buildkitd-flags '--allow-insecure-entitlement network.host'
-fi
-docker buildx use mybuilder
-
 # build kg2 image as per the platform
-docker buildx build --platform $TARGET_PLATFORM \
+docker build --platform $TARGET_PLATFORM \
     -f $TARGET_KG2_DOCKERFILE \
     -t $TARGET_KG2_TAG:latest \
-    . \
-    --load
+    .
 
-# run a registry to host the image for use with buildx build
-# which is unable to properly reference local images otherwise
-# referenced: https://github.com/docker/buildx/issues/301#issuecomment-755164475
-if ! [[ $(docker ps -a --filter "name=registry" --format '{{.Names}}') == "registry" ]]; then
-    # run a registry
-    docker run -d --name registry --network=host registry:2
-fi
-
-# tag and push the image above to the registry
-docker tag kg2:latest localhost:5000/kg2:latest
-docker push localhost:5000/kg2:latest
-
+# using the kg2 image above,
 # build extended kg2 image with decoupled additions
-# note: we make minor modifications to force the build to ref the local registry
-# for using the locally built image above
-docker buildx build --network=host \
-    --build-arg LOCAL_REGISTRY="localhost:5000" \
+docker build \
+    --build-arg IMAGE_REF="kg2" \
     --platform $TARGET_PLATFORM \
     -f $TARGET_CUDBMI_DOCKERFILE \
     -t $TARGET_CUDBMI_TAG:latest \
-    . \
-    --load
-
-# save the docker image to tar.gz
-docker save $TARGET_CUDBMI_TAG:latest | gzip > $TARGET_DOCKER_IMAGE_FILEPATH
-
-# load the docker image
-docker load -i $TARGET_DOCKER_IMAGE_FILEPATH
+    .
 
 # run the docker image with the contents of the build.test.sh script
 docker run \
